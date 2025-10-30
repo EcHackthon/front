@@ -1,0 +1,10 @@
+.playlist-page {
+    position: relative; /* ✅ 배경 레이어 위치 고정용 */
+    display: flex;
+    gap: 56px;
+    width: 100%;
+    height: 100vh; /* ✅ 전체 높이 유지 */
+    overflow: hidden;
+    padding-top: 56px; /* ✅ top 대신 padding-top 사용 */
+    box-sizing: border-box; /* ✅ padding 포함한 크기 계산 */
+}

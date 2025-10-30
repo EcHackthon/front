@@ -11,6 +11,18 @@ export default function Chat() {
   // ✅ 추가: 배경 이미지 상태
   const [backgroundImage, setBackgroundImage] = useState(null);
 
+  // ✅ 추가: 채팅창 너비 상태
+  const [chatWidth, setChatWidth] = useState(360);
+  const [isResizing, setIsResizing] = useState(false);
+
+  // ✅ 실시간 날짜 가져오기
+  const getCurrentDate = () => {
+    const today = new Date();
+    const month = today.getMonth() + 1; // 0부터 시작하므로 +1
+    const day = today.getDate();
+    return `${month}월 ${day}일`;
+  };
+
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -18,6 +30,40 @@ export default function Chat() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  // ✅ 리사이즈 핸들러
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing) return;
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth >= 300 && newWidth <= 800) {
+        setChatWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+    };
+
+    if (isResizing) {
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing]);
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -47,12 +93,11 @@ export default function Chat() {
       ></div>
 
       <section className="chat-left">
-        <h2>채팅방</h2>
-        <p>오른쪽에 채팅을 입력해보세요!</p>
       </section>
 
-      <aside className="chat-right">
-        <header className="chat-right-header">채팅</header>
+      <aside className="chat-right" style={{ width: `${chatWidth}px` }}>
+        <div className="resize-handle" onMouseDown={handleMouseDown}></div>
+        <header className="chat-right-header">{getCurrentDate()}</header>
         <div className="chat-messages">
           {messages.map((msg, index) => (
             <div

@@ -10,7 +10,7 @@ export default function App() {
     <>
       <header className="navbar">
         <nav className="nav-inner">
-          <div className="brand">통나무</div>
+          <div className="brand">TongNamu</div>
           <ul className="nav-links">
             <li><NavLink to="/">홈</NavLink></li>
             <li><NavLink to="/chat">탐색</NavLink></li>
