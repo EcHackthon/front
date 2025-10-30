@@ -116,8 +116,12 @@ export default function Chat() {
             placeholder="메시지를 입력하세요"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                sendMessage(e);
+              }
+            }}
           />
-          <button type="submit">➡️</button>
         </form>
       </aside>
     </div>

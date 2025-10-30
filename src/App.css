@@ -23,7 +23,9 @@ html, body, #root {
 .nav-inner {
   height: 100%;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 40px 0 40px;  /* 왼쪽 40px, 오른쪽 10px */
+  padding-left: 40px;
+  padding-right: 10px;  /* ✅ 오른쪽 패딩 줄임 */
   font-size: 20px;
   display: flex;
   align-items: center;
@@ -43,6 +45,12 @@ html, body, #root {
   gap: 20px;
   margin: 0;
   padding: 0;
+  align-items: center;
+}
+
+/* ✅ 설정 버튼이 있는 마지막 li 요소 간격 조정 */
+.nav-links li:last-child {
+  margin-left: -10px;
 }
 
 .nav-links a {
@@ -74,6 +82,44 @@ html, body, #root {
   background-color: #fff;
   border-radius: 10px; /* 둥근 모양 */
   transition: all 0.25s ease;
+}
+
+/* ✅ 설정 버튼 */
+.settings-button {
+  background: transparent;
+  border: none;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-button:hover {
+  transform: scale(1.12);
+}
+
+/* ✅ 햄버거 아이콘 (가로줄 3개) */
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 24px;
+}
+
+.hamburger-icon span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: #fff;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.settings-button:hover .hamburger-icon span {
+  background-color: #ddd;
 }
 
 /* 페이지 영역 (헤더 공간 확보) */
