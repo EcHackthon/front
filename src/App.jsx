@@ -94,7 +94,7 @@ export default function App() {
 
   return (
     <SpotifyProvider>
-      <header className="navbar">
+      <header className={`navbar ${location.pathname === '/' ? 'navbar-home' : ''}`}>
         <nav className="nav-inner">
           <div className="brand" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>TongNamu</div>
           <ul className="nav-links">

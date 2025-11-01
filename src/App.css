@@ -16,13 +16,19 @@ body {
   top: 0; left: 0; right: 0;
   height: 56px;
   /*background: rgba(161, 153, 153, 0.15);*/ /* 투명한 흰색 */
-  background: rgba(0, 0, 0, 0.592);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(10px);           /* 흐림 효과 */
   -webkit-backdrop-filter: blur(10px);   /* 사파리 대응 */
   color: #fff;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   pointer-events: none;  /* ✅ 네비게이션 바 자체는 클릭 불가 */
+  transition: background 0.3s ease; /* ✅ 부드러운 전환 효과 */
+}
+
+/* ✅ 홈 화면에서만 투명도 낮추기 */
+.navbar.navbar-home {
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* ✅ 네비게이션 내부 요소들은 클릭 가능하도록 */

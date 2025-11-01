@@ -5,15 +5,44 @@ import MusicPlayerCard from '../components/MusicPlayerCard';
 
 const BACKEND_SERVER_URL = "http://localhost:4000";
 
+const CHAT_STORAGE_KEY = 'chat_messages_history';
+
+// 로컬 스토리지에서 채팅 기록 불러오기
+const loadChatHistory = () => {
+  try {
+    const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // 배열이고 비어있지 않으면 반환
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error('채팅 기록 로드 실패:', err);
+  }
+  // 기본 환영 메시지
+  return [
+    { sender: "other", text: "안녕하세요! 오늘 하루는 어떤 하루였나요? 당신의 하루에 대해서 이야기해 주세요. 🎵" }
+  ];
+};
+
+// 로컬 스토리지에 채팅 기록 저장하기
+const saveChatHistory = (messages) => {
+  try {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+  } catch (err) {
+    console.error('채팅 기록 저장 실패:', err);
+  }
+};
+
 export default function Chat() {
-  const [messages, setMessages] = useState([
-    { sender: "other", text: "안녕하세요! 오늘 하루는 어떤 하루였나요? 당신의 하루에 대해서 이야기해 주세요. 🎵" },
-  ]);
+  const [messages, setMessages] = useState(loadChatHistory());
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // ✅ 추가: 배경 이미지 상태
-  const [backgroundImage, setBackgroundImage] = useState('/22.jpg');
+  const [backgroundImage, setBackgroundImage] = useState('/9.jpg');
 
   // ✅ 입력창 참조
   const inputRef = useRef(null);
@@ -44,6 +73,11 @@ export default function Chat() {
       inputRef.current.focus();
     }
   }, [isLoading]);
+
+  // ✅ 메시지가 변경될 때마다 로컬 스토리지에 저장
+  useEffect(() => {
+    saveChatHistory(messages);
+  }, [messages]);
 
   // ✅ 리사이즈 핸들러
   useEffect(() => {
@@ -216,7 +250,18 @@ export default function Chat() {
 
       <aside className="chat-right" style={{ width: `${chatWidth}px` }}>
         <div className="resize-handle" onMouseDown={handleMouseDown}></div>
-        <header className="chat-right-header">{getCurrentDate()}</header>
+        <header className="chat-right-header">
+          <button 
+            className="new-chat-button"
+            onClick={() => {
+              // 나중에 대화 초기화 기능 추가
+              console.log('새 채팅 버튼 클릭');
+            }}
+          >
+            새 채팅
+          </button>
+          <span className="header-date">{getCurrentDate()}</span>
+        </header>
         <div className="chat-messages">
           {messages.map((msg, index) => (
             <div
@@ -240,22 +285,48 @@ export default function Chat() {
             // form 외부 클릭 시에만 blur 허용
           }}
         >
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="메시지를 입력하세요"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            autoFocus
-            onBlur={(e) => {
-              // ✅ 입력창에서 포커스가 벗어나면 즉시 다시 포커스
-              setTimeout(() => {
-                if (inputRef.current && !e.relatedTarget) {
-                  inputRef.current.focus();
+          <div className="chat-input-wrapper">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="메시지를 입력하세요"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              autoFocus
+              onBlur={(e) => {
+                // ✅ 입력창에서 포커스가 벗어나면 즉시 다시 포커스
+                setTimeout(() => {
+                  if (inputRef.current && !e.relatedTarget) {
+                    inputRef.current.focus();
+                  }
+                }, 0);
+              }}
+            />
+            <button
+              type="button"
+              className="send-button"
+              onClick={() => {
+                if (input.trim() && !isLoading) {
+                  const fakeEvent = { preventDefault: () => {} };
+                  sendMessage(fakeEvent);
                 }
-              }, 0);
-            }}
-          />
+              }}
+              title="메시지 전송"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                stroke="currentColor"
+                strokeWidth="2" 
+                viewBox="0 0 24 24" 
+                width="24" 
+                height="24"
+              >
+                <path d="M22 2L11 13" />
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+              </svg>
+            </button>
+          </div>
         </form>
       </aside>
     </div>

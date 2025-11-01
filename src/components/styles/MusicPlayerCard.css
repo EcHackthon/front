@@ -14,6 +14,13 @@
   justify-content: space-between;
   z-index: 100;
   outline: none; /* 기본 포커스 아웃라인 제거 */
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+/* 노래가 없을 때 투명도 증가 */
+.music-player-card.no-track {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.5), rgba(50, 50, 50, 0.5));
+  opacity: 0.7;
 }
 
 .music-player-card:focus {

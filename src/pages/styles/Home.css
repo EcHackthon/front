@@ -30,6 +30,9 @@
   transition: all 0.3s ease;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   letter-spacing: 1px;
+  position: relative; /* ✅ 위치 조정을 위한 relative */
+  right: 250px; /* ✅ 왼쪽으로 250px 이동 (200px + 50px) */
+  top: 100px; /* ✅ 아래로 100px 이동 */
 }
 
 .find-music-button:hover {

@@ -113,7 +113,7 @@ const MusicPlayerCard = () => {
 
   return (
     <div 
-      className="music-player-card"
+      className={`music-player-card ${!currentTrack ? 'no-track' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       tabIndex={0}
