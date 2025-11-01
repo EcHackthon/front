@@ -1,0 +1,180 @@
+.playlist-page {
+    position: relative; /* ✅ 배경 레이어 위치 고정용 */
+    display: flex;
+    flex-direction: column; /* place content vertically */
+    justify-content: flex-end; /* push track list to bottom */
+    gap: 56px;
+    width: 100%;
+    height: 100vh; /* ✅ 전체 높이 유지 */
+    overflow: hidden;
+    padding-top: 56px; /* keep top padding for header area */
+    padding-bottom: 0; /* ensure content can sit flush to bottom */
+    box-sizing: border-box; /* ✅ padding 포함한 크기 계산 */
+}
+
+/* Global variables for track card (width x height). */
+:root {
+    --track-card-size: 90px; /* legacy - kept for compatibility */
+    --track-card-width: 260px; /* horizontal card width */
+    --track-card-height: 50px; /* horizontal card height (reduced by 10px) */
+    /* Playlist-specific vertical card sizing */
+    --playlist-card-width: 160px; /* vertical card width */
+    --playlist-card-height: 240px; /* vertical card height (slightly tall) */
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+}
+
+.controls button {
+    background: #1f6feb;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.controls button[disabled] {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.track-list-wrapper {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-end; /* align track list to bottom of wrapper */
+    padding: 12px 24px;
+}
+
+.track-list {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 0;
+    scroll-behavior: smooth;
+}
+
+.track-list::-webkit-scrollbar {
+    height: 10px;
+}
+.track-list::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 6px;
+}
+
+.track-card {
+    /* horizontal card: left = cover (square matching card height), right = meta */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-width: var(--track-card-width);
+    width: var(--track-card-width);
+    height: var(--track-card-height);
+    padding: 6px; /* small internal padding */
+    box-sizing: border-box;
+}
+
+.track-card { cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.track-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+/* placeholder card (used when no recommendations) */
+.track-card.placeholder {
+    cursor: default;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.track-card.placeholder .cover { background: #fff; }
+.track-card.placeholder img { background: #fff; }
+
+.track-card .cover {
+    /* make cover a square with side = card height */
+    width: var(--track-card-height);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px; /* slightly smaller so container padding looks nice */
+    flex: 0 0 auto;
+}
+
+.track-card .cover img {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.track-card .meta {
+    padding: 4px 8px 4px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Playlist-specific card class - allows independent styling from chat cards */
+.playlist-card {
+    /* Vertical/tall card for Playlist page: cover on top, meta below */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: var(--playlist-card-width);
+    height: var(--playlist-card-height);
+    padding: 8px;
+    box-sizing: border-box;
+}
+.playlist-card.placeholder {
+    cursor: default;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.playlist-card .cover {
+    width: 100%;
+    /* make top cover take roughly 65% of card height */
+    height: calc(var(--playlist-card-height) * 0.65);
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    flex: 0 0 auto;
+}
+.playlist-card .meta {
+    padding: 6px 8px 4px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    height: calc(var(--playlist-card-height) * 0.35);
+    box-sizing: border-box;
+}
+
+.track-name {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.1;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-artists {
+    font-size: 12px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty { padding: 24px; color: #444 }
+.error { color: crimson; padding: 12px 24px }

@@ -1,0 +1,254 @@
+.chat-page {
+  position: relative; /* ✅ 배경 레이어 위치 고정용 */
+  display: flex;
+  gap: 16px;
+  padding: 0;  /* ✅ 패딩 제거 */
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ✅ 추가: 배경 전용 레이어 */
+.chat-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;  
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(4px);      /* ✅ 블러 효과 핵심 */
+  transform: scale(1.1);    /* ✅ 블러 가장자리 보정 */
+  z-index: -1;              /* ✅ 뒤로 보내기 */
+  transition: background-image 0.6s ease-in-out;
+}
+
+
+
+/* 좌측 콘텐츠 */
+.chat-left {
+  flex: 1 1 auto;
+  padding: 24px 24px 24px 328px;  /* 왼쪽 패딩 = 플레이어카드(280px) + 간격(24px) + 왼쪽여백(24px) */
+  display: flex;                 /* 좌측을 플렉스 컨테이너로 변경 */
+  flex-direction: column;        /* 내부 아이템을 수직 배치 */
+  justify-content: flex-end;     /* 하단으로 정렬 */
+  padding-bottom: 24px;
+  overflow: auto;                /* 내용이 길면 스크롤 가능 */
+}
+/* Chat-specific TrackList layout: grid with up to 3 cards per row, vertical wrap and hidden scrollbar */
+.chat-left .track-list-wrapper {
+  /* limit height and enable vertical scrolling for stacked chat cards */
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box; /* include padding in height calculations */
+  padding-top: 42px; /* increased per user request */
+  margin-bottom: 0; /* allow cards to sit flush to bottom when scrolled */
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.chat-left .track-list-wrapper::-webkit-scrollbar { display: none; }
+
+.chat-left .track-list {
+  display: flex;
+  flex-direction: column; /* stack cards vertically */
+  gap: 12px;
+  align-items: stretch;
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.chat-left .track-card {
+  /* set fixed card width matching global --track-card-width/height */
+  min-width: var(--track-card-width);
+  width: var(--track-card-width);
+  height: var(--track-card-height);
+}
+
+.chat-left .track-card .cover {
+  /* make cover square matching card height in chat */
+  width: var(--track-card-height);
+  height: 100%;
+  padding-top: 0;
+}
+
+/* Chat-specific card class so chat cards can be styled independently */
+.chat-card {
+  min-width: var(--track-card-width);
+  width: var(--track-card-width);
+  height: var(--track-card-height);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.chat-card .cover {
+  width: var(--track-card-height);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  flex: 0 0 auto;
+}
+
+.chat-right {
+  position: fixed;  /* ✅ 고정 위치로 변경 */
+  right: 0;  /* ✅ 오른쪽 끝에 붙임 */
+  top: 56px;  /* ✅ 메뉴바 높이(56px)에 딱 맞춤 */
+  width: 360px;
+  height: calc(100vh - 56px); /* ✅ 메뉴바 제외한 전체 높이 */
+  /*border: 1px solid #e5e7eb;*/
+  border-radius: 0;  /* ✅ 모서리 둥글기 제거 */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: transparent;  /* ✅ 배경 투명으로 변경 */
+  /*box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);*/
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ✅ 리사이즈 핸들 */
+.resize-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  cursor: ew-resize;
+  background: transparent;
+  z-index: 1001;
+  transition: background 0.2s ease;
+}
+
+.resize-handle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.resize-handle:active {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+
+/* 채팅 헤더 */
+.chat-right-header {
+  padding: 12px 20px;
+  height: 48px;
+  font-weight: 600;
+  background: rgba(234, 234, 234, 0.15);  /* ✅ 헤더는 불투명하게 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: none;  /* ✅ 헤더는 블러 효과 제거 */
+  color: #ffffff;  /* ✅ 날짜 글자 색상 (원하는 색상으로 변경 가능) */
+  text-align: right;  /* ✅ 날짜를 오른쪽 정렬 */
+}
+
+.chat-messages {
+  flex: 1 1 auto;
+  overflow-y: scroll;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);  /* ✅ 메시지 영역만 배경 추가 */
+  backdrop-filter: blur(10px);  /* ✅ 메시지 영역만 블러 효과 */
+  
+}
+
+/* 스크롤바 전체 영역 */
+.chat-messages::-webkit-scrollbar {
+  width: 8px; /* 스크롤 두께 */
+}
+
+/* 스크롤바 트랙 (바탕) */
+.chat-messages::-webkit-scrollbar-track {
+  background: transparent; /* 투명 또는 #f0f0f0 등 */
+}
+
+/* 스크롤 손잡이 (움직이는 부분) */
+.chat-messages::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.25); /* 회색 반투명 */
+  border-radius: 10px;
+  border: 2px solid transparent; /* 안쪽 여백처럼 보이게 */
+  background-clip: content-box;
+}
+
+/* 스크롤 손잡이에 hover 시 */
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.45);
+}
+
+.msg {
+  padding: 8px 12px;
+  border-radius: 10px;
+  max-width: 75%;
+  word-break: break-word;
+  line-height: 1.35;
+  font-size: 15px;
+  width: fit-content;          /* ✅ 텍스트 크기에 맞게 */
+}
+
+.msg.other {
+  background: rgba(0, 0, 0, 0.7);
+  color: rgb(255, 255, 255);
+  align-self: flex-start;
+  margin-left: 6px;  /* ✅ 왼쪽 간격 12px(padding)과 동일하게 유지 */
+}
+
+.msg.me {
+  background: rgba(0, 0, 0, 0.4);
+  color: rgb(255, 255, 255);
+  align-self: flex-end;
+  margin-right: 0;  /* ✅ 오른쪽 간격 12px(padding)과 동일하게 유지 */
+}
+
+.chat-input {
+  display: flex;
+  padding: 40px 40px;           /* 앞의 px를 조정해서 메세지 상하 높이 조절 */
+  background: rgba(255, 255, 255, 0.15);  /* ✅ 입력창은 불투명하게 */
+  backdrop-filter: none;  /* ✅ 입력창은 블러 효과 제거 */
+  align-items: center;         /* ✅ 세로 정렬 맞춤 (이미 center로 설정됨) */
+}
+
+.chat-input input {
+  width: 100%;  /* ✅ 전체 너비 사용 */
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.5);  /* ✅ 입력 필드 불투명하게 */
+  padding: 14px 18px;            /* ✅ 위아래 패딩 증가 (8px → 12px) */
+  font-size: 15px;
+  box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.1);
+  line-height: 1.4;
+  outline: none;  /* ✅ focus 시 outline 제거 */
+}
+
+/* ✅ focus 시 테두리 색상 유지 */
+.chat-input input:focus {
+  border: 1px solid #ddd;
+}
+
+/* ✅ placeholder 색상 변경 */
+.chat-input input::placeholder {
+  color: #1d1d1d;  /* 원하는 색상으로 변경 가능 */
+  opacity: 1;
+}
+
+/* Firefox 브라우저 대응 */
+.chat-input input::-moz-placeholder {
+  color: #1d1d1d;
+  opacity: 1;
+}
+
+/* WebKit 브라우저 대응 */
+.chat-input input::-webkit-input-placeholder {
+  color: #1d1d1d;
+  opacity: 1;
+}
+
+/* MS Edge 대응 */
+.chat-input input:-ms-input-placeholder {
+  color: #1d1d1d;
+  opacity: 1;
+}
+
+

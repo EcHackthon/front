@@ -1,0 +1,137 @@
+.music-player-card {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  width: 280px;
+  height: 420px;
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(50, 50, 50, 0.95));
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.music-player-card:hover {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  transform: translateY(-4px);
+}
+
+/* 앨범 커버 */
+.album-cover {
+  width: 100%;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 재생 컨트롤 */
+.player-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.control-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.control-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.control-btn.play-btn {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #1db954, #1ed760);
+  font-size: 24px;
+}
+
+.control-btn.play-btn:hover {
+  background: linear-gradient(135deg, #1ed760, #1db954);
+}
+
+/* 볼륨 컨트롤 */
+.volume-control {
+  width: 100%;
+}
+
+.volume-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1db954;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  background: #1ed760;
+  transform: scale(1.2);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1db954;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  background: #1ed760;
+  transform: scale(1.2);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .music-player-card {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 80px;
+  }
+}
