@@ -1,0 +1,525 @@
+.playlist-page {
+    position: relative; /* ✅ 배경 레이어 위치 고정용 */
+    display: flex;
+    flex-direction: column; /* place content vertically */
+    justify-content: flex-start; /* ✅ 날짜 선택기를 위해 변경 */
+    gap: 0; /* ✅ gap 제거하여 날짜바와 트랙리스트 사이 공간 제거 */
+    width: 100%;
+    height: 100vh; /* ✅ 전체 높이 유지 */
+    overflow: hidden; /* ✅ 전체 페이지 스크롤 방지 */
+    padding-top: 56px; /* keep top padding for header area */
+    padding-bottom: 0; /* ensure content can sit flush to bottom */
+    box-sizing: border-box; /* ✅ padding 포함한 크기 계산 */
+}
+
+/* 날짜 선택기 */
+.date-selector {
+    position: relative; /* ✅ 삭제 버튼 절대 위치 기준점 */
+    display: flex;
+    gap: 8px;
+    padding: 16px 24px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    background: rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* ✅ 날짜바 크기 고정 (스크롤 시 고정됨) */
+}
+
+.date-selector::-webkit-scrollbar {
+    height: 6px;
+}
+
+.date-selector::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.date-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.date-tab:hover {
+    border-color: #1db954;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.date-tab.active {
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    color: white;
+    border-color: #1db954;
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+}
+
+.date-label {
+    font-weight: 600;
+}
+
+.track-count {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* 로딩/에러/빈 상태 */
+.playlist-loading,
+.playlist-error,
+.playlist-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    text-align: center;
+}
+
+.playlist-loading {
+    color: #666;
+    font-size: 16px;
+}
+
+.playlist-error {
+    color: #dc3545;
+    font-size: 16px;
+}
+
+.playlist-empty {
+    color: #666;
+}
+
+.playlist-empty p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.playlist-empty p:first-child {
+    font-weight: 600;
+    font-size: 18px;
+    color: #333;
+}
+
+/* Global variables for track card (width x height). */
+:root {
+    --track-card-size: 90px; /* legacy - kept for compatibility */
+    --track-card-width: 260px; /* horizontal card width */
+    --track-card-height: 50px; /* horizontal card height (reduced by 10px) */
+    /* Playlist-specific vertical card sizing */
+    --playlist-card-width: 160px; /* vertical card width */
+    --playlist-card-height: 240px; /* vertical card height (slightly tall) */
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+}
+
+.controls button {
+    background: #1f6feb;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.controls button[disabled] {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.track-list-wrapper {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-start; /* ✅ 상단에서 시작 */
+    padding: 24px;
+    overflow-y: auto; /* ✅ 세로 스크롤 가능 */
+    overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+.track-list-wrapper::-webkit-scrollbar {
+    width: 10px;
+}
+
+.track-list-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.track-list-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.track-list {
+    display: flex;
+    flex-wrap: wrap; /* ✅ 한 줄에 5개씩, 넘치면 다음 줄로 */
+    gap: 16px;
+    width: 100%;
+    align-content: flex-start; /* ✅ 상단 정렬 */
+    padding-bottom: 0;
+}
+
+.track-card {
+    /* horizontal card: left = cover (square matching card height), right = meta */
+    position: relative; /* ✅ 체크박스 절대 위치 기준 */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-width: var(--track-card-width);
+    width: var(--track-card-width);
+    height: var(--track-card-height);
+    padding: 6px; /* small internal padding */
+    box-sizing: border-box;
+}
+
+.track-card { cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease, border 0.2s ease; }
+.track-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+/* 재생 중인 카드 스타일 */
+.track-card.playing {
+    border: 2px solid #555;
+}
+
+/* placeholder card (used when no recommendations) */
+.track-card.placeholder {
+    cursor: default;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.track-card.placeholder .cover { background: #fff; }
+.track-card.placeholder img { background: #fff; }
+
+.track-card .cover {
+    /* make cover a square with side = card height */
+    width: var(--track-card-height);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px; /* slightly smaller so container padding looks nice */
+    flex: 0 0 auto;
+}
+
+.track-card .cover img {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* 트랙 재생 버튼 */
+.track-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
+    z-index: 10;
+}
+
+.track-card:hover .track-play-btn {
+    opacity: 1;
+}
+
+.track-play-btn:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    background: linear-gradient(135deg, #1ed760, #1db954);
+    box-shadow: 0 6px 16px rgba(29, 185, 84, 0.6);
+}
+
+.track-play-btn:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+.track-card .meta {
+    padding: 4px 8px 4px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Playlist-specific card class - allows independent styling from chat cards */
+.playlist-card {
+    /* Vertical/tall card for Playlist page: cover on top, meta below */
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: var(--playlist-card-width);
+    height: var(--playlist-card-height);
+    padding: 8px;
+    box-sizing: border-box;
+}
+.playlist-card.placeholder {
+    cursor: default;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.playlist-card .cover {
+    width: 100%;
+    /* make top cover take roughly 65% of card height */
+    height: calc(var(--playlist-card-height) * 0.65);
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    flex: 0 0 auto;
+}
+.playlist-card .meta {
+    padding: 6px 8px 4px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    height: calc(var(--playlist-card-height) * 0.35);
+    box-sizing: border-box;
+}
+
+.track-name {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.1;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-artists {
+    font-size: 12px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty { padding: 24px; color: #444 }
+
+/* 트랙 선택 체크박스 */
+.track-checkbox {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    z-index: 10;
+    accent-color: #1db954;
+}
+
+/* 캘린더 버튼 */
+.calendar-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #1db954;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
+}
+
+.calendar-button:active {
+    opacity: 0.9;
+}
+
+/* 캘린더 네비게이션 (인라인) */
+.calendar-nav-inline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: 16px;
+}
+
+.calendar-nav-inline .current-month {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    min-width: 120px;
+    text-align: center;
+}
+
+.calendar-nav-inline .month-nav-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #1db954;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+}
+
+.calendar-nav-inline .month-nav-button:hover {
+    color: #1ed760;
+    transform: scale(1.2);
+}
+
+.calendar-nav-inline .month-nav-button:active {
+    transform: scale(1.0);
+}
+
+/* 삭제 버튼 */
+.delete-button {
+    position: absolute; /* ✅ 절대 위치 */
+    right: 24px; /* ✅ 화면 오른쪽에서 24px */
+    top: 50%; /* ✅ 날짜 선택기 세로 중앙 */
+    transform: translateY(-50%); /* ✅ 정확한 세로 중앙 정렬 */
+    padding: 10px 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+    z-index: 10; /* ✅ 날짜 탭 위에 표시 */
+}
+
+.delete-button:hover {
+    background: #c82333;
+    transform: translateY(-50%) translateY(-2px); /* ✅ 호버 시에도 세로 정렬 유지 */
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.delete-button:active {
+    transform: translateY(-50%); /* ✅ 클릭 시 원래 위치 */
+}
+
+/* 캘린더 뷰 */
+.calendar-view {
+    flex: 1;
+    padding: 15px 40px;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    max-width: 600px;
+    width: 100%;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px;
+    color: #333;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 500;
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.calendar-day-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.calendar-day-count {
+    font-size: 11px;
+    font-weight: 400;
+    color: #666;
+    margin-top: 2px;
+}
+
+.calendar-day.has-track:hover {
+    border-color: #1db954;
+    background: rgba(29, 185, 84, 0.1);
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.calendar-day.today {
+    background: #1db954;
+    border-color: #1db954;
+}
+
+.calendar-day.today .calendar-day-number {
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day.today .calendar-day-count {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 선택된 플레이리스트 날짜 */
+.calendar-day.selected {
+    background: #666;
+    border-color: #666;
+}
+
+.calendar-day.selected .calendar-day-number {
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day.selected .calendar-day-count {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.error { color: crimson; padding: 12px 24px }

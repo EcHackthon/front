@@ -1,0 +1,214 @@
+.music-player-card {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  width: 280px;
+  height: 420px;
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(50, 50, 50, 0.95));
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 100;
+  outline: none; /* 기본 포커스 아웃라인 제거 */
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+/* 노래가 없을 때 투명도 증가 */
+.music-player-card.no-track {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.5), rgba(50, 50, 50, 0.5));
+  opacity: 0.7;
+}
+
+.music-player-card:focus {
+  outline: none;
+}
+
+/* 앨범 커버 */
+.album-cover {
+  width: 100%;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 재생 컨트롤 */
+.player-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.control-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  outline: none; /* 클릭 시 테두리 제거 */
+}
+
+.control-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.control-btn:focus {
+  outline: none; /* 포커스 시 테두리 제거 */
+}
+
+.control-btn:active {
+  outline: none; /* 클릭 중 테두리 제거 */
+}
+
+.control-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.control-btn.play-btn {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #1db954, #1ed760);
+  font-size: 24px;
+}
+
+.control-btn.play-btn:hover {
+  background: linear-gradient(135deg, #1ed760, #1db954);
+}
+
+.control-btn.play-btn:focus {
+  outline: none; /* 재생 버튼 포커스 시 테두리 제거 */
+}
+
+.control-btn.play-btn:active {
+  outline: none; /* 재생 버튼 클릭 중 테두리 제거 */
+}
+
+/* 프로그레스 바 */
+.progress-section {
+  width: 100%;
+  margin: 12px 0;
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar[style*="pointer"] {
+  cursor: pointer;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1db954, #1ed760);
+  border-radius: 3px;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
+  pointer-events: none; /* 클릭 이벤트가 부모로 전달되도록 */
+}
+
+/* 볼륨 컨트롤 */
+.volume-control {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.volume-icon {
+  font-size: 20px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  user-select: none;
+}
+
+.volume-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1db954;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  background: #1ed760;
+  transform: scale(1.2);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1db954;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  background: #1ed760;
+  transform: scale(1.2);
+}
+
+/* 반응형 - 모든 화면에서 왼쪽 하단 24px 유지 */
+@media (max-width: 768px) {
+  .music-player-card {
+    left: 24px;
+    bottom: 24px;
+  }
+  
+  .music-player-card:hover {
+    transform: translateY(-4px);
+  }
+}
