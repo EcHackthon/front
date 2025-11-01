@@ -13,7 +13,7 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
 
   // ✅ 추가: 배경 이미지 상태
-  const [backgroundImage, setBackgroundImage] = useState('/5.jpg');
+  const [backgroundImage, setBackgroundImage] = useState('/22.jpg');
 
   // ✅ 추가: 채팅창 너비 상태
   const [chatWidth, setChatWidth] = useState(500);
@@ -113,6 +113,18 @@ export default function Chat() {
         throw new Error(data.error || '서버 오류');
       }
       
+      // AI에서 필터링된 메시지('''로 시작)는 화면에 표시하지 않음
+      if (data.type === 'filtered' || data.filtered === true) {
+        console.log('[Chat] AI에서 필터링된 메시지 (표시하지 않음)');
+        return;
+      }
+      
+      // 빈 메시지는 표시하지 않음
+      if (!data.message || data.message.trim() === '') {
+        console.log('[Chat] 빈 메시지 수신 (표시하지 않음)');
+        return;
+      }
+      
       // AI 응답 메시지 추가
       setMessages((prev) => [...prev, { 
         sender: "other", 
@@ -156,21 +168,14 @@ export default function Chat() {
         <div className="resize-handle" onMouseDown={handleMouseDown}></div>
         <header className="chat-right-header">{getCurrentDate()}</header>
         <div className="chat-messages">
-          {messages.map((msg, index) => {
-            // 코드 블록으로 시작하는 메시지 필터링
-            if (msg.text && (msg.text.trim().startsWith('```') || msg.text.trim().startsWith("'''"))) {
-              return null; // 렌더링하지 않음
-            }
-            
-            return (
-              <div
-                key={index}
-                className={`msg ${msg.sender === "me" ? "me" : "other"}`}
-              >
-                {msg.text}
-              </div>
-            );
-          })}
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`msg ${msg.sender === "me" ? "me" : "other"}`}
+            >
+              {msg.text}
+            </div>
+          ))}
           <div ref={messagesEndRef}></div>
         </div>
 

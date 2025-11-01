@@ -57,7 +57,6 @@ function extractUrl(t) {
 export default function TrackList({ className, emptyVariant = 'text', variant = '' }) {
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [lastPlayedTrack, setLastPlayedTrack] = useState(null); // 마지막 재생한 트랙 ID 저장
   const wrapperRef = useRef(null); // outer wrapper (.track-list-wrapper)
   const listRef = useRef(null); // inner .track-list
   const { playTrack, accessToken, isPremium } = useSpotify();
@@ -76,39 +75,11 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
       const newPayload = json && json.ok ? json.data : json;
       setPayload(newPayload);
       
-      // 새로운 추천이 왔을 때 자동 재생 (Premium 사용자만)
+      // 자동 재생 비활성화 - 사용자가 플레이 버튼을 눌러야 재생됨
       const tracks = extractTracks(newPayload);
-      if (tracks && tracks.length > 0 && playTrack && accessToken && isPremium) {
-        const firstTrack = tracks[0];
-        const trackId = firstTrack.id || firstTrack.uri;
-        
-        // 이미 재생한 트랙이면 스킵
-        if (trackId === lastPlayedTrack) {
-          return;
-        }
-        
-        const uri = firstTrack.uri || firstTrack.track_uri;
-        const name = firstTrack.name || firstTrack.title || '';
-        const artists = formatArtists(firstTrack.artists || firstTrack.artist);
-        const img = firstTrack.album_image || firstTrack.album?.image || firstTrack.image || '';
-        
-        console.log('🎵 New recommendation detected:', { name, uri });
-        
-        if (uri) {
-          console.log('▶️ Auto-playing first track (Premium user):', name);
-          setLastPlayedTrack(trackId); // 재생한 트랙 ID 저장
-          playTrack(uri, {
-            name,
-            artists,
-            albumArt: img,
-            uri
-          });
-        } else {
-          console.warn('⚠️ First track has no URI');
-        }
-      } else if (tracks && tracks.length > 0 && (!accessToken || !isPremium)) {
-        // Premium이 아닌 경우 자동 재생하지 않음 (조용히 스킵)
-        console.log('ℹ️ New recommendation available (auto-play disabled for non-Premium users)');
+      if (tracks && tracks.length > 0) {
+        console.log('🎵 New recommendations loaded:', tracks.length, 'tracks');
+        console.log('ℹ️ Click play button to start playback');
       }
     } catch (e) {
       // Log but do not show a red error to the user
@@ -139,8 +110,34 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
           const url = extractUrl(t);
           const uri = t.uri || t.track_uri || null;
           
-          const handleClick = () => {
-            // 항상 브라우저에서 Spotify URL 열기
+          const handlePlayClick = (e) => {
+            e.stopPropagation(); // 카드 클릭 이벤트 방지
+            
+            // Premium 사용자: 트랙을 플레이어에 로드하고 즉시 재생
+            if (isPremium && playTrack && uri) {
+              console.log('▶️ Playing track:', name, 'at index', idx);
+              
+              // 트랙 데이터 준비 (전체 리스트 형식으로 변환)
+              const trackListData = tracks.map(track => ({
+                name: track.name || track.title || '',
+                artists: formatArtists(track.artists || track.artist || track.artists_names || track.artistsName),
+                albumArt: track.album_image || track.album?.image || track.image || track.album_image_url || track.cover || '',
+                uri: track.uri || track.track_uri || null
+              }));
+              
+              playTrack(uri, {
+                name,
+                artists,
+                albumArt: img,
+                uri
+              }, trackListData, idx);
+            } else if (url) {
+              window.open(url, '_blank', 'noopener');
+            }
+          };
+
+          const handleCardClick = () => {
+            // 카드 클릭 시 Spotify URL 열기
             if (url) {
               window.open(url, '_blank', 'noopener');
             }
@@ -150,19 +147,21 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
             <div
               className={`track-card ${variant ? `${variant}-card` : ''}`}
               key={idx}
-              role="button"
-              tabIndex={0}
-              onClick={handleClick}
-              onKeyDown={(e) => { 
-                if (e.key === 'Enter' || e.key === ' ') { 
-                  e.preventDefault(); 
-                  handleClick();
-                } 
-              }}
-              aria-label={`Play ${name}`}
+              onClick={handleCardClick}
             >
               <div className="cover">
                 <img src={img || PLACEHOLDER} alt={`${name} cover`} onError={(e)=>{e.currentTarget.src=PLACEHOLDER}} />
+                {/* 재생 버튼 오버레이 */}
+                {isPremium && uri && (
+                  <button 
+                    className="track-play-btn"
+                    onClick={handlePlayClick}
+                    aria-label={`Play ${name}`}
+                    title={`재생: ${name}`}
+                  >
+                    ▶
+                  </button>
+                )}
               </div>
               <div className="meta">
                 <div className="track-name" title={name}>{name || 'Unknown Title'}</div>

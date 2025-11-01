@@ -111,6 +111,43 @@
     display: block;
 }
 
+/* 트랙 재생 버튼 */
+.track-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
+    z-index: 10;
+}
+
+.track-card:hover .track-play-btn {
+    opacity: 1;
+}
+
+.track-play-btn:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    background: linear-gradient(135deg, #1ed760, #1db954);
+    box-shadow: 0 6px 16px rgba(29, 185, 84, 0.6);
+}
+
+.track-play-btn:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
 .track-card .meta {
     padding: 4px 8px 4px 0;
     display: flex;
