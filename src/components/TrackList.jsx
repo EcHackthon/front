@@ -54,7 +54,7 @@ function extractUrl(t) {
   return null;
 }
 
-export default function TrackList({ className, emptyVariant = 'text', variant = '', tracks: externalTracks = null }) {
+export default function TrackList({ className, emptyVariant = 'text', variant = '', tracks: externalTracks = null, selectedTracks = [], onToggleSelect = null }) {
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef(null); // outer wrapper (.track-list-wrapper)
@@ -156,12 +156,34 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
           // 현재 재생 중인 트랙인지 확인
           const isCurrentTrack = currentTrack && currentTrack.uri === uri;
           
+          // 선택된 트랙인지 확인
+          const isSelected = selectedTracks.includes(t.id);
+          
+          // 체크박스 클릭 핸들러
+          const handleCheckboxClick = (e) => {
+            e.stopPropagation();
+            if (onToggleSelect) {
+              onToggleSelect(t.id);
+            }
+          };
+          
           return (
             <div
               className={`track-card ${variant ? `${variant}-card` : ''} ${isCurrentTrack ? 'playing' : ''}`}
               key={idx}
               onClick={handleCardClick}
             >
+              {/* 체크박스 (onToggleSelect가 있을 때만 표시) */}
+              {onToggleSelect && (
+                <input
+                  type="checkbox"
+                  className="track-checkbox"
+                  checked={isSelected}
+                  onChange={handleCheckboxClick}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+              
               <div className="cover">
                 <img src={img || PLACEHOLDER} alt={`${name} cover`} onError={(e)=>{e.currentTarget.src=PLACEHOLDER}} />
                 {/* 재생 버튼 오버레이 */}

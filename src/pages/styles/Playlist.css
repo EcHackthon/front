@@ -3,10 +3,10 @@
     display: flex;
     flex-direction: column; /* place content vertically */
     justify-content: flex-start; /* ✅ 날짜 선택기를 위해 변경 */
-    gap: 16px;
+    gap: 0; /* ✅ gap 제거하여 날짜바와 트랙리스트 사이 공간 제거 */
     width: 100%;
     height: 100vh; /* ✅ 전체 높이 유지 */
-    overflow: hidden;
+    overflow: hidden; /* ✅ 전체 페이지 스크롤 방지 */
     padding-top: 56px; /* keep top padding for header area */
     padding-bottom: 0; /* ensure content can sit flush to bottom */
     box-sizing: border-box; /* ✅ padding 포함한 크기 계산 */
@@ -14,6 +14,7 @@
 
 /* 날짜 선택기 */
 .date-selector {
+    position: relative; /* ✅ 삭제 버튼 절대 위치 기준점 */
     display: flex;
     gap: 8px;
     padding: 16px 24px;
@@ -21,6 +22,7 @@
     flex-wrap: nowrap;
     background: rgba(0, 0, 0, 0.05);
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* ✅ 날짜바 크기 고정 (스크롤 시 고정됨) */
 }
 
 .date-selector::-webkit-scrollbar {
@@ -142,29 +144,37 @@
 .track-list-wrapper {
     flex: 1 1 auto;
     display: flex;
-    align-items: flex-end; /* align track list to bottom of wrapper */
-    padding: 12px 24px;
-    overflow-y: auto; /* 날짜별 트랙이 많을 때 스크롤 가능 */
+    align-items: flex-start; /* ✅ 상단에서 시작 */
+    padding: 24px;
+    overflow-y: auto; /* ✅ 세로 스크롤 가능 */
+    overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+.track-list-wrapper::-webkit-scrollbar {
+    width: 10px;
+}
+
+.track-list-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.track-list-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .track-list {
     display: flex;
+    flex-wrap: wrap; /* ✅ 한 줄에 5개씩, 넘치면 다음 줄로 */
     gap: 16px;
-    overflow-x: auto;
+    width: 100%;
+    align-content: flex-start; /* ✅ 상단 정렬 */
     padding-bottom: 0;
-    scroll-behavior: smooth;
-}
-
-.track-list::-webkit-scrollbar {
-    height: 10px;
-}
-.track-list::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.2);
-    border-radius: 6px;
 }
 
 .track-card {
     /* horizontal card: left = cover (square matching card height), right = meta */
+    position: relative; /* ✅ 체크박스 절대 위치 기준 */
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
@@ -316,4 +326,46 @@
 }
 
 .empty { padding: 24px; color: #444 }
+
+/* 트랙 선택 체크박스 */
+.track-checkbox {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    z-index: 10;
+    accent-color: #1db954;
+}
+
+/* 삭제 버튼 */
+.delete-button {
+    position: absolute; /* ✅ 절대 위치 */
+    right: 24px; /* ✅ 화면 오른쪽에서 24px */
+    top: 50%; /* ✅ 날짜 선택기 세로 중앙 */
+    transform: translateY(-50%); /* ✅ 정확한 세로 중앙 정렬 */
+    padding: 10px 20px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+    z-index: 10; /* ✅ 날짜 탭 위에 표시 */
+}
+
+.delete-button:hover {
+    background: #c82333;
+    transform: translateY(-50%) translateY(-2px); /* ✅ 호버 시에도 세로 정렬 유지 */
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.delete-button:active {
+    transform: translateY(-50%); /* ✅ 클릭 시 원래 위치 */
+}
 .error { color: crimson; padding: 12px 24px }

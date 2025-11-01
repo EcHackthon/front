@@ -7,6 +7,7 @@ export default function Playlist() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedTracks, setSelectedTracks] = useState([]);
 
   // localStorage에서 사용자 정보 가져오기
   const getGoogleUser = () => {
@@ -85,6 +86,69 @@ export default function Playlist() {
     return group ? group.tracks : [];
   };
 
+  // 트랙 선택 토글
+  const toggleTrackSelection = (trackId) => {
+    setSelectedTracks(prev => {
+      if (prev.includes(trackId)) {
+        return prev.filter(id => id !== trackId);
+      } else {
+        return [...prev, trackId];
+      }
+    });
+  };
+
+  // 선택된 트랙 삭제
+  const handleDeleteSelected = async () => {
+    if (selectedTracks.length === 0) return;
+
+    if (!window.confirm(`선택된 ${selectedTracks.length}개의 트랙을 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/api/recommend/tracks', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids: selectedTracks })
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        console.log(`✅ ${data.deleted_count}개 트랙 삭제됨`);
+        
+        // UI에서 삭제된 트랙 제거
+        setGroupedRecommendations(prev => {
+          return prev.map(group => ({
+            ...group,
+            tracks: group.tracks.filter(track => !selectedTracks.includes(track.id))
+          })).filter(group => group.tracks.length > 0); // 트랙이 없는 날짜 그룹 제거
+        });
+        
+        // 선택 초기화
+        setSelectedTracks([]);
+        
+        // 현재 선택된 날짜에 트랙이 없으면 다른 날짜로 변경
+        const currentGroup = groupedRecommendations.find(g => g.date === selectedDate);
+        if (currentGroup && currentGroup.tracks.filter(t => !selectedTracks.includes(t.id)).length === 0) {
+          const remaining = groupedRecommendations.filter(g => 
+            g.date !== selectedDate || g.tracks.some(t => !selectedTracks.includes(t.id))
+          );
+          if (remaining.length > 0) {
+            setSelectedDate(remaining[0].date);
+          }
+        }
+      } else {
+        alert('트랙 삭제에 실패했습니다: ' + data.message);
+      }
+    } catch (err) {
+      console.error('❌ 트랙 삭제 실패:', err);
+      alert('트랙 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="playlist-page">
@@ -126,13 +190,25 @@ export default function Playlist() {
             <span className="track-count">({group.tracks.length}곡)</span>
           </button>
         ))}
+        
+        {/* 삭제 버튼 */}
+        {selectedTracks.length > 0 && (
+          <button 
+            className="delete-button"
+            onClick={handleDeleteSelected}
+          >
+            삭제하기 ({selectedTracks.length})
+          </button>
+        )}
       </div>
 
       {/* 선택된 날짜의 트랙 리스트 */}
       <TrackList 
         tracks={getSelectedTracks()} 
         emptyVariant="none" 
-        variant="playlist" 
+        variant="playlist"
+        selectedTracks={selectedTracks}
+        onToggleSelect={toggleTrackSelection}
       />
     </div>
   );

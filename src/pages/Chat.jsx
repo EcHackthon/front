@@ -7,13 +7,16 @@ const BACKEND_SERVER_URL = "http://localhost:4000";
 
 export default function Chat() {
   const [messages, setMessages] = useState([
-    { sender: "other", text: "안녕하세요! 오늘 기분은 어떠세요? 듣고 싶은 음악에 대해 말씀해주세요 🎵" },
+    { sender: "other", text: "안녕하세요! 오늘 하루는 어떤 하루였나요? 당신의 하루에 대해서 이야기해 주세요. 🎵" },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // ✅ 추가: 배경 이미지 상태
   const [backgroundImage, setBackgroundImage] = useState('/22.jpg');
+
+  // ✅ 입력창 참조
+  const inputRef = useRef(null);
 
   // ✅ 추가: 채팅창 너비 상태
   const [chatWidth, setChatWidth] = useState(500);
@@ -34,6 +37,13 @@ export default function Chat() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  // ✅ 로딩 완료 후 입력창 포커스 복원
+  useEffect(() => {
+    if (!isLoading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading]);
 
   // ✅ 리사이즈 핸들러
   useEffect(() => {
@@ -70,7 +80,7 @@ export default function Chat() {
   };
 
   const sendMessage = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (input.trim() === "" || isLoading) return;
 
     const userMessage = input.trim();
@@ -78,6 +88,15 @@ export default function Chat() {
     // 사용자 메시지 추가
     setMessages((prev) => [...prev, { sender: "me", text: userMessage }]);
     setInput("");
+    
+    // ✅ AI 응답 대기 메시지 추가 (임시)
+    setMessages((prev) => [...prev, { sender: "other", text: "로딩중...", isLoading: true }]);
+    
+    // ✅ 입력창 포커스 유지 (상태 변경 전)
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+    
     setIsLoading(true);
 
     try {
@@ -119,11 +138,15 @@ export default function Chat() {
       if (!data.ok) {
         // 에러 응답이지만 메시지가 있으면 표시
         if (data.message) {
-          setMessages((prev) => [...prev, { 
-            sender: "other", 
-            text: data.message,
-            type: data.type || 'error'
-          }]);
+          // ✅ 로딩 메시지 제거하고 에러 메시지로 교체
+          setMessages((prev) => {
+            const filtered = prev.filter(msg => !msg.isLoading);
+            return [...filtered, { 
+              sender: "other", 
+              text: data.message,
+              type: data.type || 'error'
+            }];
+          });
           return;
         }
         throw new Error(data.error || '서버 오류');
@@ -132,22 +155,29 @@ export default function Chat() {
       // AI에서 필터링된 메시지('''로 시작)는 화면에 표시하지 않음
       if (data.type === 'filtered' || data.filtered === true) {
         console.log('[Chat] AI에서 필터링된 메시지 (표시하지 않음)');
+        // ✅ 로딩 메시지만 제거
+        setMessages((prev) => prev.filter(msg => !msg.isLoading));
         return;
       }
       
       // 빈 메시지는 표시하지 않음
       if (!data.message || data.message.trim() === '') {
         console.log('[Chat] 빈 메시지 수신 (표시하지 않음)');
+        // ✅ 로딩 메시지만 제거
+        setMessages((prev) => prev.filter(msg => !msg.isLoading));
         return;
       }
       
-      // AI 응답 메시지 추가
-      setMessages((prev) => [...prev, { 
-        sender: "other", 
-        text: data.message,
-        type: data.type,
-        recommendations: data.recommendations 
-      }]);
+      // ✅ 로딩 메시지를 실제 AI 응답으로 교체
+      setMessages((prev) => {
+        const filtered = prev.filter(msg => !msg.isLoading);
+        return [...filtered, { 
+          sender: "other", 
+          text: data.message,
+          type: data.type,
+          recommendations: data.recommendations 
+        }];
+      });
 
       // 추천 결과가 있으면 콘솔에 출력 (나중에 TrackList와 연동 가능)
       if (data.recommendations) {
@@ -156,10 +186,14 @@ export default function Chat() {
 
     } catch (error) {
       console.error("메시지 전송 실패:", error);
-      setMessages((prev) => [...prev, { 
-        sender: "other", 
-        text: `죄송합니다. 서버와 통신 중 오류가 발생했습니다.\n\n${error.message}` 
-      }]);
+      // ✅ 로딩 메시지를 에러 메시지로 교체
+      setMessages((prev) => {
+        const filtered = prev.filter(msg => !msg.isLoading);
+        return [...filtered, { 
+          sender: "other", 
+          text: `죄송합니다. 서버와 통신 중 오류가 발생했습니다.\n\n${error.message}` 
+        }];
+      });
     } finally {
       setIsLoading(false);
     }
@@ -187,7 +221,7 @@ export default function Chat() {
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`msg ${msg.sender === "me" ? "me" : "other"}`}
+              className={`msg ${msg.sender === "me" ? "me" : "other"} ${msg.isLoading ? "loading" : ""}`}
             >
               {msg.text}
             </div>
@@ -195,17 +229,31 @@ export default function Chat() {
           <div ref={messagesEndRef}></div>
         </div>
 
-        <form className="chat-input" onSubmit={sendMessage}>
+        <form 
+          className="chat-input" 
+          onSubmit={sendMessage}
+          onBlur={(e) => {
+            // ✅ form 내부 요소에서만 blur 방지
+            if (e.currentTarget.contains(e.relatedTarget)) {
+              return;
+            }
+            // form 외부 클릭 시에만 blur 허용
+          }}
+        >
           <input
+            ref={inputRef}
             type="text"
-            placeholder={isLoading ? "AI가 응답 중..." : "메시지를 입력하세요"}
+            placeholder="메시지를 입력하세요"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && !isLoading) {
-                sendMessage(e);
-              }
+            autoFocus
+            onBlur={(e) => {
+              // ✅ 입력창에서 포커스가 벗어나면 즉시 다시 포커스
+              setTimeout(() => {
+                if (inputRef.current && !e.relatedTarget) {
+                  inputRef.current.focus();
+                }
+              }, 0);
             }}
           />
         </form>
