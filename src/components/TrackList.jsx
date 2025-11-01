@@ -54,7 +54,7 @@ function extractUrl(t) {
   return null;
 }
 
-export default function TrackList({ className, emptyVariant = 'text', variant = '' }) {
+export default function TrackList({ className, emptyVariant = 'text', variant = '', tracks: externalTracks = null }) {
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef(null); // outer wrapper (.track-list-wrapper)
@@ -62,6 +62,12 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
   const { playTrack, accessToken, isPremium, currentTrack } = useSpotify();
 
   const fetchLatest = useCallback(async () => {
+    // 외부에서 tracks가 제공되면 fetch 하지 않음
+    if (externalTracks !== null) {
+      console.log('ℹ️ Using external tracks, skipping fetch');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/recommend', { method: 'GET', credentials: 'include' });
@@ -87,15 +93,19 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
     } finally {
       setLoading(false);
     }
-  }, [playTrack]);
+  }, [externalTracks, playTrack]);
 
   useEffect(() => {
-    fetchLatest();
-    const id = setInterval(fetchLatest, 10000);
-    return () => clearInterval(id);
-  }, [fetchLatest]);
+    // 외부 tracks가 제공되지 않을 때만 주기적 fetch
+    if (externalTracks === null) {
+      fetchLatest();
+      const id = setInterval(fetchLatest, 10000);
+      return () => clearInterval(id);
+    }
+  }, [fetchLatest, externalTracks]);
 
-  const tracks = extractTracks(payload);
+  // 외부에서 제공된 tracks가 있으면 그것 사용, 없으면 payload에서 추출
+  const tracks = externalTracks !== null ? externalTracks : extractTracks(payload);
   const WHITE_PLACEHOLDER = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="100%" height="100%" fill="%23ffffff"/></svg>';
 
   // Prepare content depending on tracks / emptyVariant

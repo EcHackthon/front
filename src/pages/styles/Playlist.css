@@ -2,14 +2,110 @@
     position: relative; /* ✅ 배경 레이어 위치 고정용 */
     display: flex;
     flex-direction: column; /* place content vertically */
-    justify-content: flex-end; /* push track list to bottom */
-    gap: 56px;
+    justify-content: flex-start; /* ✅ 날짜 선택기를 위해 변경 */
+    gap: 16px;
     width: 100%;
     height: 100vh; /* ✅ 전체 높이 유지 */
     overflow: hidden;
     padding-top: 56px; /* keep top padding for header area */
     padding-bottom: 0; /* ensure content can sit flush to bottom */
     box-sizing: border-box; /* ✅ padding 포함한 크기 계산 */
+}
+
+/* 날짜 선택기 */
+.date-selector {
+    display: flex;
+    gap: 8px;
+    padding: 16px 24px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    background: rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.date-selector::-webkit-scrollbar {
+    height: 6px;
+}
+
+.date-selector::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.date-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.date-tab:hover {
+    border-color: #1db954;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.date-tab.active {
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    color: white;
+    border-color: #1db954;
+    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+}
+
+.date-label {
+    font-weight: 600;
+}
+
+.track-count {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* 로딩/에러/빈 상태 */
+.playlist-loading,
+.playlist-error,
+.playlist-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    text-align: center;
+}
+
+.playlist-loading {
+    color: #666;
+    font-size: 16px;
+}
+
+.playlist-error {
+    color: #dc3545;
+    font-size: 16px;
+}
+
+.playlist-empty {
+    color: #666;
+}
+
+.playlist-empty p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.playlist-empty p:first-child {
+    font-weight: 600;
+    font-size: 18px;
+    color: #333;
 }
 
 /* Global variables for track card (width x height). */
@@ -48,6 +144,7 @@
     display: flex;
     align-items: flex-end; /* align track list to bottom of wrapper */
     padding: 12px 24px;
+    overflow-y: auto; /* 날짜별 트랙이 많을 때 스크롤 가능 */
 }
 
 .track-list {
