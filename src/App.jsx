@@ -61,6 +61,22 @@ export default function App() {
         localStorage.setItem('google_user', JSON.stringify(user));
         setGoogleUser(user);
         
+        // 백엔드로 사용자 정보 전송 (Supabase 저장)
+        fetch('http://localhost:4000/auth/google/user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(user),
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log('✅ 사용자 정보가 Supabase에 저장되었습니다:', data);
+          })
+          .catch(err => {
+            console.error('❌ Supabase 저장 실패:', err);
+          });
+        
         // URL 파라미터 제거
         window.history.replaceState({}, document.title, location.pathname);
       } catch (err) {

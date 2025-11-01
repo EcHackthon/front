@@ -13,12 +13,11 @@
   flex-direction: column;
   justify-content: space-between;
   z-index: 100;
-  transition: all 0.3s ease;
+  outline: none; /* 기본 포커스 아웃라인 제거 */
 }
 
-.music-player-card:hover {
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
-  transform: translateY(-4px);
+.music-player-card:focus {
+  outline: none;
 }
 
 /* 앨범 커버 */
@@ -58,11 +57,20 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  outline: none; /* 클릭 시 테두리 제거 */
 }
 
 .control-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.1);
+}
+
+.control-btn:focus {
+  outline: none; /* 포커스 시 테두리 제거 */
+}
+
+.control-btn:active {
+  outline: none; /* 클릭 중 테두리 제거 */
 }
 
 .control-btn:disabled {
@@ -79,6 +87,14 @@
 
 .control-btn.play-btn:hover {
   background: linear-gradient(135deg, #1ed760, #1db954);
+}
+
+.control-btn.play-btn:focus {
+  outline: none; /* 재생 버튼 포커스 시 테두리 제거 */
+}
+
+.control-btn.play-btn:active {
+  outline: none; /* 재생 버튼 클릭 중 테두리 제거 */
 }
 
 /* 프로그레스 바 */
@@ -104,6 +120,15 @@
   border-radius: 3px;
   overflow: hidden;
   position: relative;
+  transition: height 0.2s ease;
+}
+
+.progress-bar:hover {
+  height: 8px;
+}
+
+.progress-bar[style*="pointer"] {
+  cursor: pointer;
 }
 
 .progress-fill {
@@ -112,15 +137,29 @@
   border-radius: 3px;
   transition: width 0.1s linear;
   box-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
+  pointer-events: none; /* 클릭 이벤트가 부모로 전달되도록 */
 }
 
 /* 볼륨 컨트롤 */
 .volume-control {
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.volume-icon {
+  font-size: 20px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  user-select: none;
 }
 
 .volume-slider {
-  width: 100%;
+  flex: 1;
   height: 6px;
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.1);

@@ -31,7 +31,7 @@ export const SpotifyProvider = ({ children }) => {
   // Error state
   const [error, setError] = useState(null);
 
-  // URL에서 토큰 파라미터 확인 (OAuth 콜백)
+  // URL에서 토큰 파라미터 확인 (OAuth 콜백) - 한 번만 실행
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('spotify_token');
@@ -42,16 +42,20 @@ export const SpotifyProvider = ({ children }) => {
       console.log('Token (first 20 chars):', token.substring(0, 20) + '...');
       localStorage.setItem('spotify_access_token', token);
       setAccessToken(token);
-      // URL 파라미터 제거
-      window.history.replaceState({}, document.title, window.location.pathname);
-      console.log('✅ Spotify token saved to localStorage');
-    } else {
-      // URL에 토큰이 없으면 localStorage에서 복원 시도
-      const savedToken = localStorage.getItem('spotify_access_token');
-      if (savedToken && !accessToken) {
-        console.log('🔄 Restoring Spotify token from localStorage');
-        setAccessToken(savedToken);
+      
+      // 원래 페이지로 리다이렉트
+      const returnPath = localStorage.getItem('spotify_login_return_path');
+      localStorage.removeItem('spotify_login_return_path');
+      
+      if (returnPath && returnPath !== '/chat') {
+        console.log('↩️ Redirecting back to:', returnPath);
+        window.location.href = returnPath;
+      } else {
+        // URL 파라미터만 제거 (현재 페이지 유지)
+        window.history.replaceState({}, document.title, window.location.pathname);
+        console.log('✅ Spotify token saved to localStorage');
       }
+      return; // 토큰을 받았으면 localStorage 복원은 하지 않음
     }
 
     if (error) {
@@ -59,8 +63,16 @@ export const SpotifyProvider = ({ children }) => {
       alert('Spotify 로그인 중 오류가 발생했습니다: ' + error);
       // URL 파라미터 제거
       window.history.replaceState({}, document.title, window.location.pathname);
+      return;
     }
-  }, []);
+
+    // URL에 토큰이 없을 때만 localStorage에서 복원 시도
+    const savedToken = localStorage.getItem('spotify_access_token');
+    if (savedToken) {
+      console.log('🔄 Restoring Spotify token from localStorage');
+      setAccessToken(savedToken);
+    }
+  }, []); // 빈 배열 유지 - 컴포넌트 마운트 시 한 번만 실행
 
   // 사용자 프로필 확인 (Premium 여부)
   const checkUserProfile = useCallback(async (token) => {
@@ -276,6 +288,9 @@ export const SpotifyProvider = ({ children }) => {
 
   // Spotify 로그인
   const login = () => {
+    // 현재 페이지 경로를 localStorage에 저장 (콜백 후 돌아올 위치)
+    localStorage.setItem('spotify_login_return_path', window.location.pathname);
+    console.log('🔐 Spotify login initiated from:', window.location.pathname);
     window.location.href = 'http://localhost:4000/api/spotify/login';
   };
 
@@ -423,6 +438,24 @@ export const SpotifyProvider = ({ children }) => {
     player.setVolume(vol);
   }, [player, isReady]);
 
+  // 재생 위치 변경 (seek)
+  const seekToPosition = useCallback((positionMs) => {
+    if (!player || !isReady || !isPremium) {
+      console.warn('⚠️ Cannot seek: player not ready or not premium');
+      return;
+    }
+    
+    const seekPos = Math.max(0, Math.min(duration, positionMs));
+    console.log(`⏩ Seeking to position: ${seekPos}ms`);
+    
+    player.seek(seekPos).then(() => {
+      console.log('✅ Seek successful');
+      setPosition(seekPos);
+    }).catch(err => {
+      console.error('❌ Seek failed:', err);
+    });
+  }, [player, isReady, isPremium, duration]);
+
   // 현재 재생 상태 가져오기
   const getCurrentState = useCallback(() => {
     if (!player) {
@@ -489,6 +522,7 @@ export const SpotifyProvider = ({ children }) => {
     skipToNext,
     skipToPrevious,
     setVolumeLevel,
+    seekToPosition,
     getCurrentState,
     setAccessToken
   };

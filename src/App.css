@@ -3,6 +3,11 @@
 html, body, #root {
   height: 100%;
   margin: 0;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+body {
+  overflow-y: auto; /* 세로 스크롤은 필요시 허용 */
 }
 
 /* 투명 + 유리 느낌 메뉴바 */

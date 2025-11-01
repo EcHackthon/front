@@ -59,7 +59,7 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef(null); // outer wrapper (.track-list-wrapper)
   const listRef = useRef(null); // inner .track-list
-  const { playTrack, accessToken, isPremium } = useSpotify();
+  const { playTrack, accessToken, isPremium, currentTrack } = useSpotify();
 
   const fetchLatest = useCallback(async () => {
     setLoading(true);
@@ -142,10 +142,13 @@ export default function TrackList({ className, emptyVariant = 'text', variant = 
               window.open(url, '_blank', 'noopener');
             }
           };
+
+          // 현재 재생 중인 트랙인지 확인
+          const isCurrentTrack = currentTrack && currentTrack.uri === uri;
           
           return (
             <div
-              className={`track-card ${variant ? `${variant}-card` : ''}`}
+              className={`track-card ${variant ? `${variant}-card` : ''} ${isCurrentTrack ? 'playing' : ''}`}
               key={idx}
               onClick={handleCardClick}
             >

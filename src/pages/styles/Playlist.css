@@ -82,8 +82,13 @@
     box-sizing: border-box;
 }
 
-.track-card { cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.track-card { cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease, border 0.2s ease; }
 .track-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+
+/* 재생 중인 카드 스타일 */
+.track-card.playing {
+    border: 2px solid #555;
+}
 
 /* placeholder card (used when no recommendations) */
 .track-card.placeholder {

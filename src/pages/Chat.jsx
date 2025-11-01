@@ -81,6 +81,21 @@ export default function Chat() {
     setIsLoading(true);
 
     try {
+      // 구글 사용자 정보 가져오기 (세션-사용자 매핑용)
+      const savedUser = localStorage.getItem('google_user');
+      let googleId = null;
+      if (savedUser) {
+        try {
+          const googleUser = JSON.parse(savedUser);
+          googleId = googleUser.id;
+          console.log('[Chat] 구글 사용자 ID:', googleId);
+        } catch (err) {
+          console.error('구글 사용자 정보 파싱 실패:', err);
+        }
+      } else {
+        console.warn('[Chat] ⚠️ 구글 로그인이 되어있지 않습니다. 추천곡이 저장되지 않습니다.');
+      }
+      
       // 백엔드 서버로 메시지 전송 (백엔드 → AI 서버 → 백엔드 → 프론트)
       const response = await fetch(`${BACKEND_SERVER_URL}/api/chat`, {
         method: 'POST',
@@ -90,6 +105,7 @@ export default function Chat() {
         body: JSON.stringify({
           message: userMessage,
           session_id: 'default',
+          google_id: googleId, // 구글 ID 전달 (세션-사용자 매핑 및 추천곡 저장용)
         }),
       });
 
