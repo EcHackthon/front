@@ -219,7 +219,7 @@
   gap: 8px;
   background: rgba(255, 255, 255, 0.15);  /* ✅ 메시지 영역만 배경 추가 */
   backdrop-filter: blur(10px);  /* ✅ 메시지 영역만 블러 효과 */
-  
+  outline: none; /* 포커스 시 아웃라인 제거 */
 }
 
 /* 스크롤바 전체 영역 */

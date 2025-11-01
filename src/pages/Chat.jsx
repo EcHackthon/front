@@ -40,6 +40,7 @@ export default function Chat() {
   const [messages, setMessages] = useState(loadChatHistory());
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [recommendedTracks, setRecommendedTracks] = useState(null); // ✅ 추천 트랙 상태 (null로 초기화)
 
   // ✅ 추가: 배경 이미지 상태
   const [backgroundImage, setBackgroundImage] = useState('/9.jpg');
@@ -213,9 +214,10 @@ export default function Chat() {
         }];
       });
 
-      // 추천 결과가 있으면 콘솔에 출력 (나중에 TrackList와 연동 가능)
-      if (data.recommendations) {
+      // 추천 결과가 있으면 TrackList에 표시
+      if (data.recommendations && data.recommendations.tracks) {
         console.log("받은 추천 목록:", data.recommendations);
+        setRecommendedTracks(data.recommendations.tracks);
       }
 
     } catch (error) {
@@ -244,7 +246,11 @@ export default function Chat() {
       ></div>
 
       <section className="chat-left">
-        <TrackList emptyVariant="none" variant="chat" />
+        <TrackList 
+          tracks={recommendedTracks} 
+          emptyVariant="none" 
+          variant="chat" 
+        />
         <MusicPlayerCard />
       </section>
 
@@ -262,7 +268,14 @@ export default function Chat() {
           </button>
           <span className="header-date">{getCurrentDate()}</span>
         </header>
-        <div className="chat-messages">
+        <div 
+          className="chat-messages"
+          tabIndex={0}
+          onClick={(e) => {
+            // 메시지 영역 클릭 시 포커스를 주어 스크롤 가능하도록
+            e.currentTarget.focus();
+          }}
+        >
           {messages.map((msg, index) => (
             <div
               key={index}
@@ -293,14 +306,6 @@ export default function Chat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               autoFocus
-              onBlur={(e) => {
-                // ✅ 입력창에서 포커스가 벗어나면 즉시 다시 포커스
-                setTimeout(() => {
-                  if (inputRef.current && !e.relatedTarget) {
-                    inputRef.current.focus();
-                  }
-                }, 0);
-              }}
             />
             <button
               type="button"

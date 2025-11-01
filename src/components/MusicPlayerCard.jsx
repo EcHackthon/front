@@ -49,16 +49,39 @@ const MusicPlayerCard = () => {
     seekToPosition(newPosition);
   };
 
-  // 키보드 이벤트 처리
+  // 키보드 이벤트 처리 (전역)
   useEffect(() => {
-    if (!isHovered) return;
-
     const handleKeyDown = (e) => {
-      // 입력 필드에서는 무시
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      // 활성화된 요소 확인
+      const activeElement = document.activeElement;
+      
+      // 입력 필드나 textarea에 포커스되어 있으면 무시
+      if (
+        activeElement.tagName === 'INPUT' || 
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.isContentEditable
+      ) {
         return;
       }
 
+      // 스크롤 가능한 영역인지 확인 (자신 또는 부모 요소 중 하나라도 스크롤 가능하면)
+      const isScrollable = (element) => {
+        if (!element || element === document.body) return false;
+        
+        const style = window.getComputedStyle(element);
+        const overflowY = style.overflowY;
+        
+        // overflow-y가 auto나 scroll인 경우 스크롤 가능으로 판단
+        if (overflowY === 'auto' || overflowY === 'scroll') {
+          return true;
+        }
+        
+        // 부모 요소도 재귀적으로 확인
+        return isScrollable(element.parentElement);
+      };
+      
+      const isInScrollableArea = isScrollable(activeElement);
+      
       switch (e.key) {
         case ' ':
         case 'Spacebar':
@@ -84,6 +107,30 @@ const MusicPlayerCard = () => {
           }
           break;
         
+        case 'ArrowUp':
+          // 스크롤 가능한 영역이면 스크롤 기능 유지
+          if (!isInScrollableArea) {
+            e.preventDefault();
+            const newVolume = Math.min(100, volume + 5);
+            setVolume(newVolume);
+            if (setVolumeLevel) {
+              setVolumeLevel(newVolume / 100);
+            }
+          }
+          break;
+        
+        case 'ArrowDown':
+          // 스크롤 가능한 영역이면 스크롤 기능 유지
+          if (!isInScrollableArea) {
+            e.preventDefault();
+            const newVolume = Math.max(0, volume - 5);
+            setVolume(newVolume);
+            if (setVolumeLevel) {
+              setVolumeLevel(newVolume / 100);
+            }
+          }
+          break;
+        
         default:
           break;
       }
@@ -94,7 +141,7 @@ const MusicPlayerCard = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isHovered, currentTrack, togglePlay, isPremium, isReady, position, duration, seekToPosition]);
+  }, [currentTrack, togglePlay, isPremium, isReady, position, duration, seekToPosition, volume, setVolumeLevel]);
 
   // 시간을 MM:SS 형식으로 변환
   const formatTime = (ms) => {
@@ -116,7 +163,6 @@ const MusicPlayerCard = () => {
       className={`music-player-card ${!currentTrack ? 'no-track' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      tabIndex={0}
     >
       {/* 앨범 커버 */}
       <div className="album-cover">

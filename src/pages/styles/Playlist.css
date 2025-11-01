@@ -339,6 +339,62 @@
     accent-color: #1db954;
 }
 
+/* 캘린더 버튼 */
+.calendar-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #1db954;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(29, 185, 84, 0.3);
+}
+
+.calendar-button:active {
+    opacity: 0.9;
+}
+
+/* 캘린더 네비게이션 (인라인) */
+.calendar-nav-inline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: 16px;
+}
+
+.calendar-nav-inline .current-month {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    min-width: 120px;
+    text-align: center;
+}
+
+.calendar-nav-inline .month-nav-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #1db954;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+}
+
+.calendar-nav-inline .month-nav-button:hover {
+    color: #1ed760;
+    transform: scale(1.2);
+}
+
+.calendar-nav-inline .month-nav-button:active {
+    transform: scale(1.0);
+}
+
 /* 삭제 버튼 */
 .delete-button {
     position: absolute; /* ✅ 절대 위치 */
@@ -368,4 +424,102 @@
 .delete-button:active {
     transform: translateY(-50%); /* ✅ 클릭 시 원래 위치 */
 }
+
+/* 캘린더 뷰 */
+.calendar-view {
+    flex: 1;
+    padding: 15px 40px;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    max-width: 600px;
+    width: 100%;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px;
+    color: #333;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 500;
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.calendar-day-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.calendar-day-count {
+    font-size: 11px;
+    font-weight: 400;
+    color: #666;
+    margin-top: 2px;
+}
+
+.calendar-day.has-track:hover {
+    border-color: #1db954;
+    background: rgba(29, 185, 84, 0.1);
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.calendar-day.today {
+    background: #1db954;
+    border-color: #1db954;
+}
+
+.calendar-day.today .calendar-day-number {
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day.today .calendar-day-count {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 선택된 플레이리스트 날짜 */
+.calendar-day.selected {
+    background: #666;
+    border-color: #666;
+}
+
+.calendar-day.selected .calendar-day-number {
+    color: white;
+    font-weight: 700;
+}
+
+.calendar-day.selected .calendar-day-count {
+    color: rgba(255, 255, 255, 0.9);
+}
+
 .error { color: crimson; padding: 12px 24px }

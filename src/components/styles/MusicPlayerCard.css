@@ -127,11 +127,6 @@
   border-radius: 3px;
   overflow: hidden;
   position: relative;
-  transition: height 0.2s ease;
-}
-
-.progress-bar:hover {
-  height: 8px;
 }
 
 .progress-bar[style*="pointer"] {
