@@ -195,8 +195,8 @@ export default function Playlist() {
     }
 
     try {
-      const response = await fetch('http://localhost:4000/api/recommend/tracks', {
-        method: 'DELETE',
+      const response = await fetch('https://back-ieck.onrender.com/api/recommend/tracks', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },

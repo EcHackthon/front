@@ -61,13 +61,9 @@ export default function App() {
         localStorage.setItem('google_user', JSON.stringify(user));
         setGoogleUser(user);
         
-        // 백엔드로 사용자 정보 전송 (Supabase 저장)
-        fetch('http://localhost:4000/auth/google/user', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(user),
+        // 백엔드로부터 구글 사용자 정보 가져오기
+        fetch('https://back-ieck.onrender.com/auth/google/user', {
+          credentials: 'include',
         })
           .then(response => response.json())
           .then(data => {

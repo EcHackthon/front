@@ -31,17 +31,16 @@ export const SpotifyProvider = ({ children }) => {
   // Error state
   const [error, setError] = useState(null);
 
-  // URL에서 토큰 파라미터 확인 (OAuth 콜백) - 한 번만 실행
+  // URL에서 OAuth 콜백 확인 (세션 기반) - 한 번만 실행
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('spotify_token');
+    const success = params.get('spotify_success');
     const error = params.get('spotify_error');
 
-    if (token) {
-      console.log('🎫 New Spotify token received from OAuth callback');
-      console.log('Token (first 20 chars):', token.substring(0, 20) + '...');
-      localStorage.setItem('spotify_access_token', token);
-      setAccessToken(token);
+    if (success) {
+      console.log('🎫 Spotify OAuth successful - token stored in session');
+      // 세션에서 토큰을 가져오는 API 호출
+      fetchTokenFromSession();
       
       // 원래 페이지로 리다이렉트
       const returnPath = localStorage.getItem('spotify_login_return_path');
@@ -53,9 +52,9 @@ export const SpotifyProvider = ({ children }) => {
       } else {
         // URL 파라미터만 제거 (현재 페이지 유지)
         window.history.replaceState({}, document.title, window.location.pathname);
-        console.log('✅ Spotify token saved to localStorage');
+        console.log('✅ Spotify authenticated via session');
       }
-      return; // 토큰을 받았으면 localStorage 복원은 하지 않음
+      return;
     }
 
     if (error) {
@@ -66,13 +65,30 @@ export const SpotifyProvider = ({ children }) => {
       return;
     }
 
-    // URL에 토큰이 없을 때만 localStorage에서 복원 시도
-    const savedToken = localStorage.getItem('spotify_access_token');
-    if (savedToken) {
-      console.log('🔄 Restoring Spotify token from localStorage');
-      setAccessToken(savedToken);
-    }
+    // OAuth 콜백이 아닌 경우 세션에서 토큰 복원 시도
+    fetchTokenFromSession();
   }, []); // 빈 배열 유지 - 컴포넌트 마운트 시 한 번만 실행
+
+  // 세션에서 토큰 가져오기
+  const fetchTokenFromSession = async () => {
+    try {
+      const response = await fetch('https://back-ieck.onrender.com/api/spotify/token', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔄 Token restored from session');
+        setAccessToken(data.access_token);
+      } else {
+        console.log('ℹ️ No valid session token available');
+        setAccessToken(null);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch token from session:', error);
+      setAccessToken(null);
+    }
+  };
 
   // 사용자 프로필 확인 (Premium 여부)
   const checkUserProfile = useCallback(async (token) => {
@@ -223,9 +239,8 @@ export const SpotifyProvider = ({ children }) => {
       spotifyPlayer.on('authentication_error', ({ message }) => {
         console.error('❌ Authentication error:', message);
         setError(`Authentication error: ${message}`);
-        // 토큰이 만료되었을 수 있음
-        localStorage.removeItem('spotify_access_token');
-        setAccessToken(null);
+        // 토큰이 만료되었을 수 있음 - 세션에서 재시도
+        fetchTokenFromSession();
       });
 
       spotifyPlayer.on('account_error', ({ message }) => {
@@ -291,7 +306,7 @@ export const SpotifyProvider = ({ children }) => {
     // 현재 페이지 경로를 localStorage에 저장 (콜백 후 돌아올 위치)
     localStorage.setItem('spotify_login_return_path', window.location.pathname);
     console.log('🔐 Spotify login initiated from:', window.location.pathname);
-    window.location.href = 'http://localhost:4000/api/spotify/login';
+    window.location.href = 'https://back-ieck.onrender.com/api/spotify/login';
   };
 
   // 트랙 재생 (Premium 전용)
@@ -338,13 +353,13 @@ export const SpotifyProvider = ({ children }) => {
     try {
       console.log('▶️ Playing on device:', deviceId);
       
-      const response = await fetch('http://localhost:4000/api/spotify/play', {
+      const response = await fetch('https://back-ieck.onrender.com/api/spotify/play', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          access_token: accessToken,
           device_id: deviceId,
           track_uri: trackUri
         })
@@ -473,8 +488,11 @@ export const SpotifyProvider = ({ children }) => {
       player.disconnect();
     }
     
-    // localStorage 정리
-    localStorage.removeItem('spotify_access_token');
+    // 백엔드 세션 정리 (선택적)
+    fetch('https://back-ieck.onrender.com/api/spotify/logout', {
+      method: 'POST',
+      credentials: 'include'
+    }).catch(err => console.warn('Logout request failed:', err));
     
     // 상태 초기화
     setAccessToken(null);

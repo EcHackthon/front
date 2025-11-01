@@ -3,7 +3,7 @@ import "./styles/Chat.css";
 import TrackList from '../components/TrackList';
 import MusicPlayerCard from '../components/MusicPlayerCard';
 
-const BACKEND_SERVER_URL = "http://localhost:4000";
+const BACKEND_SERVER_URL = "https://back-ieck.onrender.com";
 
 const CHAT_STORAGE_KEY = 'chat_messages_history';
 

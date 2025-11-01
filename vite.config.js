@@ -8,7 +8,12 @@ export default defineConfig({
     // 개발용 프록시: /api 로 시작하는 요청을 백엔드로 전달합니다.
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',
+        target: 'https://back-ieck.onrender.com',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/auth': {
+        target: 'https://back-ieck.onrender.com',
         changeOrigin: true,
         secure: false,
       }

@@ -17,7 +17,7 @@ export default function Settings({ isOpen, onClose, googleUser, setGoogleUser })
   // 구글 로그인
   const handleGoogleLogin = () => {
     console.log('🔐 Initiating Google login...');
-    window.location.href = 'http://localhost:4000/auth/google';
+    window.location.href = 'https://back-ieck.onrender.com/auth/google';
   };
 
   // 구글 로그아웃
